@@ -10,7 +10,7 @@ import (
 func main() {
 	rand.Seed(time.Now().Unix())
 	http.HandleFunc("/", HelloServer)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":80", nil)
 }
 
 func HelloServer(w http.ResponseWriter, _ *http.Request) {
