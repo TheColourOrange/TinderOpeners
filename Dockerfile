@@ -10,20 +10,6 @@ FROM golang@sha256:244a736db4a1d2611d257e7403c729663ce2eb08d4628868f9d9ef2735496
 # Ca-certificates is required to call HTTPS endpoints.
 RUN apk update && apk add --no-cache git ca-certificates tzdata && update-ca-certificates
 
-# Create appuser
-ENV USER=appuser
-ENV UID=10001
-
-# See https://stackoverflow.com/a/55757473/12429735
-RUN adduser \
-    --disabled-password \
-    --gecos "" \
-    --home "/nonexistent" \
-    --shell "/sbin/nologin" \
-    --no-create-home \
-    --uid "${UID}" \
-    "${USER}"
-
 RUN mkdir -p $GOPATH/src/mypackage/myapp/
 WORKDIR $GOPATH/src/mypackage/myapp/
 COPY ./src/ .
@@ -45,13 +31,9 @@ FROM scratch
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /etc/passwd /etc/passwd
-COPY --from=builder /etc/group /etc/group
 
 # Copy our static executable
 COPY --from=builder /go/bin/binary /go/bin/binary
-
-# Use an unprivileged user.
-USER appuser:appuser
 
 # Run the "binary" binary.
 ENTRYPOINT ["/go/bin/binary"]
